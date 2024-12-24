@@ -1,0 +1,8 @@
+skibidi main {
+    rizz i = 1;
+    goon (i < 5) {
+        yapping("AAAAAH A GOONIN LOOP");
+        yapping("%d", i);
+        i = i + 1;
+    }
+}

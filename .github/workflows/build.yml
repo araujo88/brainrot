@@ -2,13 +2,13 @@ name: Brainrot CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
     paths-ignore:
       - "**/*.md"
       - "CODEOWNERS"
       - "Makefile"
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
     paths-ignore:
       - "**/*.md"
       - "CODEOWNERS"
@@ -16,28 +16,28 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install gcc flex bison libfl-dev -y
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install gcc flex bison libfl-dev -y
 
-    - name: Build Brainrot
-      run: |
-        bison -d -Wcounterexamples lang.y -o lang.tab.c
-        flex lang.l
-        gcc -o brainrot lang.tab.c lex.yy.c ast.c -lfl
+      - name: Build Brainrot
+        run: |
+          bison -d -Wcounterexamples lang.y -o lang.tab.c
+          flex lang.l
+          gcc -o brainrot lang.tab.c lex.yy.c ast.c -lfl
 
-    - name: Run Brainrot examples
-      run: |
-        ./brainrot < examples/fizz_buzz.brainrot
-        ./brainrot < examples/for_loop.brainrot
-        ./brainrot < examples/hello_world.brainrot
-        ./brainrot < examples/output_error.brainrot
-        ./brainrot < examples/switch_case.brainrot
+      - name: Run Brainrot examples
+        run: |
+          ./brainrot < examples/fizz_buzz.brainrot
+          ./brainrot < examples/for_loop.brainrot
+          ./brainrot < examples/hello_world.brainrot
+          ./brainrot < examples/output_error.brainrot
+          ./brainrot < examples/switch_case.brainrot
+          ./brainrot < examples/while_loop.brainrot

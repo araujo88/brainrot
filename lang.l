@@ -5,6 +5,38 @@
 #include "ast.h"
 #include "lang.tab.h"
 
+char *unescape_string(const char *src) {
+    // Allocate a buffer big enough for the worst case
+    // (same length as src, since we only shrink on escapes)
+    char *dest = malloc(strlen(src) + 1);
+    char *d = dest;
+    const char *s = src;
+
+    while (*s) {
+        if (*s == '\\') {
+            s++;
+            switch (*s) {
+                case 'n':  *d++ = '\n'; break;
+                case 't':  *d++ = '\t'; break;
+                case '\\': *d++ = '\\'; break;
+                case '"':  *d++ = '"'; break;
+                // ... handle other escapes you care about ...
+                default:
+                    // If it's an unknown escape like \q,
+                    // you might just copy it literally or skip it.
+                    *d++ = *s;
+                    break;
+            }
+            s++;
+        } else {
+            *d++ = *s++;
+        }
+    }
+    *d = '\0';
+    return dest;
+}
+
+
 extern int yylineno;
 %}
 
@@ -42,8 +74,7 @@ extern int yylineno;
 "chungus"        { return UNION; }
 "nonut"          { return UNSIGNED; }
 "schizo"         { return VOLATILE; }
-"goon"           { return WHILE; }
-"yapping"        { return YAPPING; }
+"goon"           { return GOON; }
 "baka"           { return BAKA; }
 
 "=="             { return EQ; }
@@ -73,8 +104,15 @@ extern int yylineno;
 [0-9]+           { yylval.ival = atoi(yytext); return NUMBER; }
 [a-zA-Z_][a-zA-Z0-9_]* { yylval.sval = strdup(yytext); return IDENTIFIER; }
 \"([^\\\"]|\\.)*\" {
-    yylval.sval = strdup(yytext + 1);
-    yylval.sval[strlen(yylval.sval) - 1] = '\0';
+    // Strip the leading and trailing quotes:
+    char *raw = strdup(yytext + 1);
+    raw[strlen(raw) - 1] = '\0';
+
+    // Convert backslash escapes to real characters:
+    char *unescaped = unescape_string(raw);
+    free(raw);
+
+    yylval.sval = unescaped;  // Now it has real newlines, etc.
     return STRING_LITERAL;
 }
 [ \t\n]+         ; /* Ignore whitespace */

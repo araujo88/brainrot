@@ -8,7 +8,7 @@ skibidi main {
         } amogus edging ( (i % 5) == 0 ) {
             yapping("Buzz");
         } amogus {
-            yapping(i);
+            yapping("%d", i);
         }
     }
     bussin 0;

@@ -39,6 +39,7 @@ typedef enum
     NODE_OPERATION,
     NODE_UNARY_OPERATION,
     NODE_FOR_STATEMENT,
+    NODE_WHILE_STATEMENT,
     NODE_PRINT_STATEMENT,
     NODE_ERROR_STATEMENT,
     NODE_STATEMENT_LIST,
@@ -48,6 +49,7 @@ typedef enum
     NODE_CASE,
     NODE_DEFAULT_CASE,
     NODE_BREAK_STATEMENT,
+    NODE_FUNC_CALL,
 } NodeType;
 
 /* Structures */
@@ -77,6 +79,12 @@ typedef struct
     CaseNode *cases;     // Linked list of cases
 } SwitchNode;
 
+typedef struct ArgumentList
+{
+    struct ASTNode *expr;
+    struct ArgumentList *next;
+} ArgumentList;
+
 /* AST node structure */
 struct ASTNode
 {
@@ -103,6 +111,16 @@ struct ASTNode
             ASTNode *incr;
             ASTNode *body;
         } for_stmt;
+        struct
+        { // For 'while' statements
+            ASTNode *cond;
+            ASTNode *body;
+        } while_stmt;
+        struct
+        {
+            char *function_name;
+            ArgumentList *arguments;
+        } func_call;
         StatementList *statements; // For statement lists
         IfStatementNode if_stmt;   // For if statements
         SwitchNode switch_stmt;
@@ -119,6 +137,9 @@ ASTNode *create_assignment_node(char *name, ASTNode *expr);
 ASTNode *create_operation_node(OperatorType op, ASTNode *left, ASTNode *right);
 ASTNode *create_unary_operation_node(OperatorType op, ASTNode *operand);
 ASTNode *create_for_statement_node(ASTNode *init, ASTNode *cond, ASTNode *incr, ASTNode *body);
+ASTNode *create_while_statement_node(ASTNode *cond, ASTNode *body);
+ASTNode *create_function_call_node(char *func_name, ArgumentList *args);
+ArgumentList *create_argument_list(ASTNode *expr, ArgumentList *existing_list);
 ASTNode *create_print_statement_node(ASTNode *expr);
 ASTNode *create_error_statement_node(ASTNode *expr);
 ASTNode *create_statement_list(ASTNode *statement, ASTNode *next_statement);
@@ -134,6 +155,10 @@ int evaluate_expression(ASTNode *node);
 void execute_statement(ASTNode *node);
 void execute_statements(ASTNode *node);
 void execute_for_statement(ASTNode *node);
+void execute_while_statement(ASTNode *node);
+void execute_yapping_call(ArgumentList *args);
+void execute_yappin_call(ArgumentList *args);
+void execute_baka_call(ArgumentList *args);
 void free_ast(ASTNode *node);
 
 #endif /* AST_H */

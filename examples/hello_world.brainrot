@@ -1,4 +1,4 @@
 skibidi main {
-    yapping("Hello, World!");
+    yappin("Hello, World!\n");
     bussin 0;
 }
