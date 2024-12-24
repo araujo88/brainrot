@@ -1,4 +1,4 @@
-# The Brainrot Programming Language
+# Brainrot User Guide
 
 # 1. Introduction
 
