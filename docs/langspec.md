@@ -1,0 +1,303 @@
+# The Brainrot Programming Language
+
+# 1. Introduction
+
+This language (informally called **Brainrot**) allows you to write a “main” function using the keyword `skibidi main`, declare integer variables with `rizz`, and use specialized keywords for loops (`goon` for while, `flex` for for-loops), conditionals (`edging` for if, `amogus` for else), and more. It also includes three built-in print/error functions—`yapping`, `yappin`, and `baka`—to handle common output scenarios.
+
+Below, you’ll find a reference for each core feature, along with short code snippets illustrating proper usage.
+
+---
+
+# 2. Program Structure
+
+A valid program must contain at least one **main function** defined by:
+
+```c
+skibidi main {
+    // ... statements ...
+}
+```
+
+- **`skibidi main { ... }`**: The entry point of your program. Code within these braces executes first.
+- The curly braces `{ }` enclose a series of **statements**.
+
+### Minimal Example
+
+```c
+skibidi main {
+    // This is a simple program
+    yapping("Hello from Brainrot!");
+}
+```
+
+When run, it prints:
+
+```
+Hello from Brainrot!
+```
+
+*(followed by a newline due to `yapping`)*
+
+---
+
+# 3. Variables and Declarations
+
+Use **`rizz`** as the type for declaring integer variables. For instance:
+
+```c
+rizz i = 10;
+rizz count;
+```
+
+- **`rizz i = 10;`**: Declares an integer variable `i` with initial value 10.  
+- **`rizz count;`**: Declares an integer variable `count` (automatically initialized to 0 if your implementation sets a default, or remain uninitialized if your grammar does so—check your usage).
+
+### Basic Assignment
+
+```c
+i = i + 1;
+count = 42;
+```
+  
+- This reassigns the variable using the typical `=` operator.  
+
+---
+
+# 4. Expressions and Statements
+
+**Expressions** can be numeric literals (`42`), identifiers (`i`), operations (`i + 1`, `i < 5`), or function calls (`yapping(...)`). **Statements** include declarations, assignments, loops, conditionals, and so on.
+
+A **statement** often ends with a **semicolon** `;` unless it is a compound statement (like `{ ... }`).
+
+Examples of valid statements:
+```c
+rizz i = 1;
+i = i + 1;
+yapping("%d", i);
+```
+
+---
+
+# 5. Conditionals (`edging` / `amogus`)
+
+Use **`edging (expression) { ... }`** to define an **if** statement. Optional **`amogus`** handles the else part.
+
+```c
+edging (i < 5) {
+    yapping("i is less than 5");
+}
+amogus {
+    yapping("i is 5 or more");
+}
+```
+
+- **`edging`**: The “if” keyword.  
+- **`amogus`**: The “else” keyword.  
+
+You can nest these if you want multiple branches.
+
+---
+
+# 6. Loops
+
+## 6.1. `goon` (While Loop)
+
+Use **`goon (condition) { ... }`** as a while loop:
+
+```c
+goon (i < 5) {
+    yapping("Inside while loop, i=%d", i);
+    i = i + 1;
+}
+```
+
+- Executes the body repeatedly **while** `(condition)` is **true**.  
+- Checks `(i < 5)` each iteration and stops once `i >= 5`.
+
+## 6.2. `flex` (For Loop)
+
+Use **`flex (init_expr; condition; increment) { ... }`** to define a for loop:
+
+```c
+flex (rizz j = 0; j < 3; j = j + 1) {
+    yapping("j = %d", j);
+}
+```
+
+- **`init_expr`**: A declaration or expression to initialize loop variables (e.g., `rizz j = 0`).  
+- **`condition`**: Checked each iteration (e.g., `j < 3`).  
+- **`increment`**: Executed at the end of each iteration (e.g., `j = j + 1`).  
+
+---
+
+# 7. Switch Statements (`ohio`)
+
+Switch statements use the keyword **`ohio`**:
+
+```c
+ohio (expr) {
+    sigma rule 1:
+        yapping("Case 1");
+        bruh;
+    sigma rule 2:
+        yapping("Case 2");
+        bruh;
+    based:
+        yapping("Default case");
+}
+```
+
+- **`ohio (expr)`**: The `switch` statement, evaluating `expr`.
+- **`sigma rule`**: The `case` keyword (e.g., `sigma rule 1:` for `case 1:`).
+- **`based`**: The `default` keyword.
+- **`bruh`**: The `break` statement, optionally used to exit the switch after a case.
+
+*(Your actual grammar might vary, but these are the typical synonyms used.)*
+
+---
+
+# 8. Return Statements (`bussin`)
+
+To return from **`skibidi main`** (or any function, if you support them), use **`bussin expression`**:
+
+```c
+bussin 0;
+```
+
+- This signals that your program (or function) finishes execution and returns the given value.  
+
+*(If your grammar doesn’t define actual multi-function usage beyond `main`, `bussin 0` is a typical “exit code.”)*
+
+---
+
+# 9. Built-In Functions for Printing
+
+Your language includes **three** built-in print/error functions for convenience:
+
+| Function   | Destination   | Auto Newline | Typical Usage                                       |
+|------------|---------------|--------------|-----------------------------------------------------|
+| **yapping** | `stdout`      | Yes, always  | Quick line-based printing (adds `\n` automatically) |
+| **yappin**  | `stdout`      | No           | Precise control over spacing/newlines               |
+| **baka**    | `stderr`      | No           | Log errors or warnings, typically no extra newline  |
+
+## 9.1. yapping
+
+**Prototype**  
+```c
+void yapping(const char* format, ...);
+```
+**Key Points**  
+- Behaves like `printf`, but **always** appends a newline afterward.  
+- If your format string itself ends with `\n`, you effectively get **two** line breaks.  
+
+### Example
+
+```c
+yapping("Hello %s", "User");
+// Prints => "Hello User" + newline
+```
+
+## 9.2. yappin
+
+**Prototype**  
+```c
+void yappin(const char* format, ...);
+```
+**Key Points**  
+- Behaves like `printf` with **no** additional newline.  
+- You must manually include `\n` if you want line breaks.
+
+### Example
+
+```c
+yappin("Hello ");
+// Still on same line
+yappin("World!\n");  // One newline here
+```
+
+## 9.3. baka
+
+**Prototype**  
+```c
+void baka(const char* format, ...);
+```
+**Key Points**  
+- Writes to **`stderr`** by default (often used for errors).  
+- No automatic newline (unless your code or `format` includes it).
+
+### Example
+
+```c
+baka("Error: something went wrong at %s\n", location);
+```
+
+*(This prints to stderr, not stdout.)*
+
+---
+
+# 10. Example Program
+
+Below is a short **full** example showing variable declarations, loops, conditionals, and printing:
+
+```c
+skibidi main {
+    // Declare a variable and initialize
+    rizz i = 1;
+
+    // While loop (goon) runs while i < 5
+    goon (i < 5) {
+        // Print a message with a newline automatically
+        yapping("AAAAAH A GOONIN LOOP, i=%d", i);
+
+        // Alternatively, print precisely (no auto newline)
+        yappin("Just i => %d\n", i);
+
+        // Increment i
+        i = i + 1;
+    }
+
+    edging (i == 5) {
+        // If i is exactly 5, print a message
+        yapping("We ended with i=5");
+    }
+    amogus {
+        // Otherwise, do something else
+        baka("Unexpected i value: %d\n", i);
+    }
+
+    // Return from main
+    bussin 0;
+}
+```
+
+### Explanation
+
+1. **`rizz i = 1;`** declares an integer `i` with initial value 1.  
+2. **`goon (i < 5) { ... }`** loops while `i` is less than 5.  
+3. Inside the loop, two prints:
+   - `yapping(...)` => includes an automatic newline.  
+   - `yappin(...)` => user must add `\n` if needed.  
+4. We increment `i` each iteration until `i >= 5`.  
+5. **`edging (i == 5) { ... } amogus { ... }`** checks if `i` is exactly 5. If not, logs an error using `baka(...)`.  
+6. **`bussin 0;`** exits the program with code 0.
+
+---
+
+## 11. Additional Notes
+
+- **Keywords** like `skibidi`, `rizz`, `goon`, `flex`, `edging`, `amogus`, etc., are specialized synonyms for standard concepts (`main`, `int`, `while`, `for`, `if`, `else`, etc.).  
+- **Syntax** is otherwise quite C-like: `;` to end statements, braces `{ }` to define blocks, parentheses `( )` around conditions.  
+- **Expressions** accept typical operators (`+`, `-`, `*`, `/`, `%`, relational, logical) plus the assignment operator `=`, matching standard precedence rules.  
+- **Escapes in strings** (`"\n"`, `"\t"`, etc.) may require an unescape function in your lexer, so check that it’s converting them into real newlines or tabs at runtime.
+
+---
+
+# Final Thoughts
+
+This language—often called **Brainrot**—provides a playful wrapper around standard C-like structures, with unique keywords and easy built-in printing:
+
+- **`yapping`** for automatic line-based output.  
+- **`yappin`** for precise printing without automatic newlines.  
+- **`baka`** for error messages or logs to `stderr`.
+
+Use them together with the custom control-flow keywords (`goon`, `flex`, etc.) and custom variable type (`rizz`) to write concise, whimsical, yet powerful scripts. Enjoy experimenting with your new language!
