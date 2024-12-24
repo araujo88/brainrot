@@ -9,6 +9,7 @@
 int yylex(void);
 void yyerror(const char *s);
 void yapping(const char* format, ...);
+void yappin(const char* format, ...);
 void baka(const char* format, ...);
 
 /* Symbol table to hold variable values */
@@ -60,16 +61,17 @@ ASTNode *root = NULL;
     char *sval;
     ASTNode *node;
     CaseNode *case_node;
+    ArgumentList *args;
 }
 
 /* Define token types */
-%token SKIBIDI RIZZ YAPPING BAKA MAIN BUSSIN FLEX 
+%token SKIBIDI RIZZ BAKA MAIN BUSSIN FLEX 
 %token PLUS MINUS TIMES DIVIDE MOD SEMICOLON COLON COMMA
 %token LPAREN RPAREN LBRACE RBRACE
 %token LT GT LE GE EQ NE EQUALS AND OR
 %token BREAK CASE CHAR CONST CONTINUE DEFAULT DO DOUBLE ELSE ENUM
 %token EXTERN FLOAT FOR GOTO IF INT LONG REGISTER SHORT SIGNED
-%token SIZEOF STATIC STRUCT SWITCH TYPEDEF UNION UNSIGNED VOID VOLATILE WHILE
+%token SIZEOF STATIC STRUCT SWITCH TYPEDEF UNION UNSIGNED VOID VOLATILE GOON
 %token <sval> IDENTIFIER
 %token <ival> NUMBER
 %token <sval> STRING_LITERAL
@@ -80,7 +82,9 @@ ASTNode *root = NULL;
 %type <node> declaration
 %type <node> expression
 %type <node> for_statement
-%type <node> print_statement
+%type <node> while_statement
+%type <node> function_call
+%type <args> arg_list argument_list
 %type <node> error_statement
 %type <node> return_statement
 %type <node> init_expr condition increment
@@ -127,7 +131,9 @@ statement:
         { $$ = $1; }
     | for_statement
         { $$ = $1; }
-    | print_statement SEMICOLON
+    | while_statement
+        { $$ = $1; }
+    | function_call SEMICOLON
         { $$ = $1; }
     | error_statement SEMICOLON
         { $$ = $1; }
@@ -138,6 +144,8 @@ statement:
     | switch_statement
         { $$ = $1; }
     | break_statement SEMICOLON
+        { $$ = $1; }
+    | expression SEMICOLON
         { $$ = $1; }
     ;
 
@@ -200,6 +208,14 @@ for_statement:
         }
     ;
 
+while_statement:
+    GOON LPAREN expression RPAREN LBRACE statements RBRACE
+        {
+            $$ = create_while_statement_node($3, $6);
+        }
+    ;
+
+
 init_expr:
       declaration
         { $$ = $1; }
@@ -217,9 +233,38 @@ increment:
         { $$ = $1; }
     ;
 
-print_statement:
-    YAPPING LPAREN expression RPAREN
-        { $$ = create_print_statement_node($3); }
+function_call:
+    IDENTIFIER LPAREN arg_list RPAREN
+      { $$ = create_function_call_node($1, $3); }
+    ;
+
+arg_list
+    : /* empty */
+      {
+        $$ = NULL; /* No arguments */
+      }
+    | argument_list
+      { 
+        $$ = $1; 
+      }
+    ;
+
+argument_list
+    : expression
+      {
+        /*
+         * Single-argument list
+         * We'll create a linked list (or array) of argument nodes
+         */
+        $$ = create_argument_list($1, NULL);
+      }
+    | argument_list COMMA expression
+      {
+        /*
+         * Append the new expression to the existing argument list
+         */
+        $$ = create_argument_list($3, $1);
+      }
     ;
 
 error_statement:
@@ -287,6 +332,14 @@ void yyerror(const char *s) {
 }
 
 void yapping(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    vprintf(format, args);
+    va_end(args);
+    printf("\n");
+}
+
+void yappin(const char* format, ...) {
     va_list args;
     va_start(args, format);
     vprintf(format, args);

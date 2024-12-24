@@ -3,6 +3,7 @@
 #include "ast.h"
 #include <stdbool.h>
 #include <setjmp.h>
+#include <string.h>
 
 static jmp_buf break_env;
 
@@ -48,6 +49,7 @@ extern bool set_variable(char *name, int value);
 extern int get_variable(char *name);
 extern void yyerror(const char *s);
 extern void yapping(const char *format, ...);
+extern void yappin(const char *format, ...);
 extern void baka(const char *format, ...);
 
 /* Function implementations */
@@ -108,6 +110,47 @@ ASTNode *create_for_statement_node(ASTNode *init, ASTNode *cond, ASTNode *incr, 
     return node;
 }
 
+ASTNode *create_while_statement_node(ASTNode *cond, ASTNode *body)
+{
+    ASTNode *node = malloc(sizeof(ASTNode));
+    node->type = NODE_WHILE_STATEMENT;
+    node->data.while_stmt.cond = cond;
+    node->data.while_stmt.body = body;
+    return node;
+}
+
+ASTNode *create_function_call_node(char *func_name, ArgumentList *args)
+{
+    ASTNode *node = malloc(sizeof(ASTNode));
+    node->type = NODE_FUNC_CALL;
+    node->data.func_call.function_name = strdup(func_name);
+    node->data.func_call.arguments = args;
+    return node;
+}
+
+ArgumentList *create_argument_list(ASTNode *expr, ArgumentList *existing_list)
+{
+    ArgumentList *new_node = malloc(sizeof(ArgumentList));
+    new_node->expr = expr;
+    new_node->next = NULL;
+
+    if (!existing_list)
+    {
+        return new_node;
+    }
+    else
+    {
+        /* Append to the end of existing_list */
+        ArgumentList *temp = existing_list;
+        while (temp->next)
+        {
+            temp = temp->next;
+        }
+        temp->next = new_node;
+        return existing_list;
+    }
+}
+
 ASTNode *create_print_statement_node(ASTNode *expr)
 {
     ASTNode *node = malloc(sizeof(ASTNode));
@@ -124,11 +167,11 @@ ASTNode *create_error_statement_node(ASTNode *expr)
     return node;
 }
 
-ASTNode *create_statement_list(ASTNode *statement, ASTNode *next_statement)
+ASTNode *create_statement_list(ASTNode *statement, ASTNode *existing_list)
 {
-    if (!next_statement)
+    if (!existing_list)
     {
-        /* Create a new statement list */
+        // If there's no existing list, create a new one
         ASTNode *node = malloc(sizeof(ASTNode));
         node->type = NODE_STATEMENT_LIST;
         node->data.statements = malloc(sizeof(StatementList));
@@ -138,12 +181,18 @@ ASTNode *create_statement_list(ASTNode *statement, ASTNode *next_statement)
     }
     else
     {
-        /* Prepend to existing list */
-        StatementList *list = malloc(sizeof(StatementList));
-        list->statement = statement;
-        list->next = next_statement->data.statements;
-        next_statement->data.statements = list;
-        return next_statement;
+        // Append at the end of existing_list
+        StatementList *sl = existing_list->data.statements;
+        while (sl->next)
+        {
+            sl = sl->next;
+        }
+        // Now sl is the last element; append the new statement
+        StatementList *new_item = malloc(sizeof(StatementList));
+        new_item->statement = statement;
+        new_item->next = NULL;
+        sl->next = new_item;
+        return existing_list;
     }
 }
 
@@ -215,6 +264,36 @@ int evaluate_expression(ASTNode *node)
     case NODE_STRING_LITERAL:
         yyerror("Cannot evaluate a string literal as an integer");
         return 0;
+    case NODE_FUNC_CALL:
+    {
+        // e.g. get function name
+        char *name = node->data.func_call.function_name;
+        ArgumentList *args = node->data.func_call.arguments;
+
+        // If your language has only built-in functions like yapping, baka, etc.
+        // you can do a simple if/else or switch:
+        if (strcmp(name, "yapping") == 0)
+        {
+            execute_yapping_call(args);
+            return 0;
+        }
+        if (strcmp(name, "yappin") == 0)
+        {
+            execute_yappin_call(args);
+            return 0;
+        }
+        else if (strcmp(name, "baka") == 0)
+        {
+            execute_baka_call(args);
+            return 0;
+        }
+        else
+        {
+            // If you want user-defined functions, you'd handle them here
+            yyerror("Unknown function call");
+            return 0;
+        }
+    }
     default:
         yyerror("Unknown expression type");
         return 0;
@@ -234,8 +313,14 @@ void execute_statement(ASTNode *node)
     case NODE_IDENTIFIER:
         evaluate_expression(node);
         break;
+    case NODE_FUNC_CALL:
+        evaluate_expression(node);
+        break;
     case NODE_FOR_STATEMENT:
         execute_for_statement(node);
+        break;
+    case NODE_WHILE_STATEMENT:
+        execute_while_statement(node);
         break;
     case NODE_PRINT_STATEMENT:
     {
@@ -301,16 +386,6 @@ void execute_statements(ASTNode *node)
         return;
     }
     StatementList *current = node->data.statements;
-    /* Reverse the list to maintain correct order */
-    StatementList *reversed = NULL;
-    while (current)
-    {
-        StatementList *next = current->next;
-        current->next = reversed;
-        reversed = current;
-        current = next;
-    }
-    current = reversed;
     while (current)
     {
         execute_statement(current->statement);
@@ -325,6 +400,14 @@ void execute_for_statement(ASTNode *node)
     {
         execute_statement(node->data.for_stmt.body);
         evaluate_expression(node->data.for_stmt.incr);
+    }
+}
+
+void execute_while_statement(ASTNode *node)
+{
+    while (evaluate_expression(node->data.while_stmt.cond))
+    {
+        execute_statement(node->data.while_stmt.body);
     }
 }
 
@@ -386,4 +469,98 @@ ASTNode *create_break_node()
     node->type = NODE_BREAK_STATEMENT;
     node->data.break_stmt = NULL;
     return node;
+}
+
+void execute_yapping_call(ArgumentList *args)
+{
+    if (!args)
+    {
+        yapping("\n");
+        return;
+    }
+
+    // Evaluate the first argument as a string (the format)
+    // e.g. "Hello %d\n"
+    ASTNode *formatNode = args->expr;
+    if (formatNode->type != NODE_STRING_LITERAL)
+    {
+        yyerror("First argument to yapping must be a string literal");
+        return;
+    }
+    const char *formatString = formatNode->data.name;
+
+    // Move to next argument(s), which are the actual values
+    ArgumentList *cur = args->next;
+
+    // If you only want to handle exactly one additional integer:
+    if (cur)
+    {
+        // Evaluate expression (e.g. 42)
+        int val = evaluate_expression(cur->expr);
+
+        // Pass that to yapping(...) as if you did yapping("Hello %d\n", 42);
+        yapping(formatString, val);
+
+        // You could handle more arguments if needed:
+        // cur = cur->next;
+        // ...
+    }
+    else
+    {
+        // No additional values, so just print the string
+        yapping("%s", formatString);
+    }
+}
+
+void execute_yappin_call(ArgumentList *args)
+{
+    if (!args)
+    {
+        yappin("\n");
+        return;
+    }
+
+    // Evaluate the first argument as a string (the format)
+    // e.g. "Hello %d\n"
+    ASTNode *formatNode = args->expr;
+    if (formatNode->type != NODE_STRING_LITERAL)
+    {
+        yyerror("First argument to yapping must be a string literal");
+        return;
+    }
+    const char *formatString = formatNode->data.name;
+
+    // Move to next argument(s), which are the actual values
+    ArgumentList *cur = args->next;
+
+    // If you only want to handle exactly one additional integer:
+    if (cur)
+    {
+        // Evaluate expression (e.g. 42)
+        int val = evaluate_expression(cur->expr);
+
+        // Pass that to yapping(...) as if you did yapping("Hello %d\n", 42);
+        yappin(formatString, val);
+
+        // You could handle more arguments if needed:
+        // cur = cur->next;
+        // ...
+    }
+    else
+    {
+        // No additional values, so just print the string
+        yappin("%s", formatString);
+    }
+}
+
+void execute_baka_call(ArgumentList *args)
+{
+    if (!args)
+    {
+        baka("\n");
+        return;
+    }
+    // parse the first argument as a format string
+    // parse subsequent arguments as integers, etc.
+    // call "baka(formatString, val, ...)"
 }
