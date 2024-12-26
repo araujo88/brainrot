@@ -62,6 +62,14 @@ ASTNode *create_number_node(int value)
     return node;
 }
 
+ASTNode *create_char_node(char value)
+{
+    ASTNode *node = malloc(sizeof(ASTNode));
+    node->type = NODE_CHAR;
+    node->data.value = value;
+    return node;
+}
+
 ASTNode *create_identifier_node(char *name)
 {
     ASTNode *node = malloc(sizeof(ASTNode));
@@ -204,6 +212,8 @@ int evaluate_expression(ASTNode *node)
     {
     case NODE_NUMBER:
         return node->data.value;
+    case NODE_CHAR:
+        return node->data.value;
     case NODE_IDENTIFIER:
         return get_variable(node->data.name);
     case NODE_ASSIGNMENT:
@@ -310,6 +320,7 @@ void execute_statement(ASTNode *node)
     case NODE_OPERATION:
     case NODE_UNARY_OPERATION:
     case NODE_NUMBER:
+    case NODE_CHAR:
     case NODE_IDENTIFIER:
         evaluate_expression(node);
         break;
