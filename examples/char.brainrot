@@ -1,0 +1,5 @@
+skibidi main {
+    yap char = 'c';
+    yapping("%c", char);
+    bussin 0;
+}

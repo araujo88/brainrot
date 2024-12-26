@@ -58,6 +58,7 @@ ASTNode *root = NULL;
 
 %union {
     int ival;
+    char cval;
     char *sval;
     ASTNode *node;
     CaseNode *case_node;
@@ -65,16 +66,17 @@ ASTNode *root = NULL;
 }
 
 /* Define token types */
-%token SKIBIDI RIZZ BAKA MAIN BUSSIN FLEX 
+%token SKIBIDI RIZZ YAP BAKA MAIN BUSSIN FLEX 
 %token PLUS MINUS TIMES DIVIDE MOD SEMICOLON COLON COMMA
 %token LPAREN RPAREN LBRACE RBRACE
 %token LT GT LE GE EQ NE EQUALS AND OR
-%token BREAK CASE CHAR CONST CONTINUE DEFAULT DO DOUBLE ELSE ENUM
+%token BREAK CASE CONST CONTINUE DEFAULT DO DOUBLE ELSE ENUM
 %token EXTERN FLOAT FOR GOTO IF INT LONG REGISTER SHORT SIGNED
 %token SIZEOF STATIC STRUCT SWITCH TYPEDEF UNION UNSIGNED VOID VOLATILE GOON
 %token <sval> IDENTIFIER
 %token <ival> NUMBER
 %token <sval> STRING_LITERAL
+%token <cval> CHAR
 
 /* Declare types for non-terminals */
 %type <node> program skibidi_function
@@ -187,6 +189,10 @@ declaration:
         { $$ = create_assignment_node($3, create_number_node(0)); }
     | optional_modifiers RIZZ IDENTIFIER EQUALS expression
         { $$ = create_assignment_node($3, $5); }
+    |  optional_modifiers YAP IDENTIFIER
+        { $$ = create_assignment_node($3, create_char_node(0)); }
+    | optional_modifiers YAP IDENTIFIER EQUALS expression
+        { $$ = create_assignment_node($3, $5); }
     ;
 
 optional_modifiers:
@@ -280,6 +286,8 @@ return_statement:
 expression:
       NUMBER
         { $$ = create_number_node($1); }
+    | CHAR
+        { $$ = create_char_node($1); }
     | IDENTIFIER
         { $$ = create_identifier_node($1); }
     | IDENTIFIER EQUALS expression
