@@ -35,9 +35,8 @@ jobs:
 
       - name: Run Brainrot examples
         run: |
-          ./brainrot < examples/fizz_buzz.brainrot
-          ./brainrot < examples/for_loop.brainrot
-          ./brainrot < examples/hello_world.brainrot
-          ./brainrot < examples/output_error.brainrot
-          ./brainrot < examples/switch_case.brainrot
+          for file in examples/*.brainrot; do
+            ./brainrot < "$file"
+          done
+
           ./brainrot < examples/while_loop.brainrot
