@@ -34,6 +34,7 @@ typedef enum
 typedef enum
 {
     NODE_NUMBER,
+    NODE_CHAR,
     NODE_IDENTIFIER,
     NODE_ASSIGNMENT,
     NODE_OPERATION,
@@ -132,6 +133,7 @@ struct ASTNode
 
 /* Function prototypes */
 ASTNode *create_number_node(int value);
+ASTNode *create_char_node(char value);
 ASTNode *create_identifier_node(char *name);
 ASTNode *create_assignment_node(char *name, ASTNode *expr);
 ASTNode *create_operation_node(OperatorType op, ASTNode *left, ASTNode *right);

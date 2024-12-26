@@ -51,7 +51,7 @@ extern int yylineno;
 "main"           { return MAIN; }
 "bruh"           { return BREAK; }
 "sigma rule"     { return CASE; }
-"yap"            { return CHAR; }
+"yap"            { return YAP; }
 "grimace"        { return CONST; }
 "grind"          { return CONTINUE; }
 "based"          { return DEFAULT; }
@@ -102,6 +102,7 @@ extern int yylineno;
 ":"              { return COLON; }
 
 [0-9]+           { yylval.ival = atoi(yytext); return NUMBER; }
+'.' { yylval.ival = yytext[1]; return CHAR; }
 [a-zA-Z_][a-zA-Z0-9_]* { yylval.sval = strdup(yytext); return IDENTIFIER; }
 \"([^\\\"]|\\.)*\" {
     // Strip the leading and trailing quotes:
@@ -115,6 +116,33 @@ extern int yylineno;
     yylval.sval = unescaped;  // Now it has real newlines, etc.
     return STRING_LITERAL;
 }
+\'([^\\\']|\\.)\' {
+    // The text matched includes the leading and trailing single quotes, e.g. 'c'.
+    // We'll decode the actual character inside.
+    char c;
+    
+    if (yytext[1] == '\\') {
+        // Handle escape sequences like '\n', '\t', '\\', '\''
+        switch (yytext[2]) {
+            case 'n':  c = '\n'; break;
+            case 't':  c = '\t'; break;
+            case '\\': c = '\\'; break;
+            case '\'': c = '\''; break;
+            // You can add more escapes if you need them
+            default:
+                // If unrecognized, just use the literal char
+                c = yytext[2];
+                break;
+        }
+    } else {
+        // Normal single character, e.g. 'c'
+        c = yytext[1];
+    }
+    
+    yylval.ival = c;  // Put the character in the parser’s yylval
+    return YAP; 
+}
+
 [ \t\n]+         ; /* Ignore whitespace */
 .                { /* Ignore unrecognized characters */ }
 
