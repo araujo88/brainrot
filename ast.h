@@ -86,10 +86,18 @@ typedef struct ArgumentList
     struct ArgumentList *next;
 } ArgumentList;
 
+typedef struct
+{
+    bool is_volatile;
+    bool is_signed;
+    bool is_unsigned;
+} TypeModifiers;
+
 /* AST node structure */
 struct ASTNode
 {
     NodeType type;
+    TypeModifiers modifiers;
     union
     {
         int value;  // For numbers
@@ -152,6 +160,7 @@ CaseNode *create_case_node(ASTNode *value, ASTNode *statements);
 CaseNode *create_default_case_node(ASTNode *statements);
 CaseNode *append_case_list(CaseNode *list, CaseNode *case_node);
 ASTNode *create_break_node();
+TypeModifiers get_current_modifiers(void);
 
 int evaluate_expression(ASTNode *node);
 void execute_statement(ASTNode *node);
@@ -162,5 +171,6 @@ void execute_yapping_call(ArgumentList *args);
 void execute_yappin_call(ArgumentList *args);
 void execute_baka_call(ArgumentList *args);
 void free_ast(ASTNode *node);
+void reset_modifiers(void);
 
 #endif /* AST_H */

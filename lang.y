@@ -16,6 +16,7 @@ void baka(const char* format, ...);
 typedef struct {
     char *name;
     int value;
+    TypeModifiers modifiers;
 } variable;
 
 #define MAX_VARS 100
@@ -23,16 +24,32 @@ variable symbol_table[MAX_VARS];
 int var_count = 0;
 
 /* Function to add or update variables in the symbol table */
-bool set_variable(char *name, int value) {
+bool set_variable(char *name, int value, TypeModifiers mods) {
     for (int i = 0; i < var_count; i++) {
         if (strcmp(symbol_table[i].name, name) == 0) {
-            symbol_table[i].value = value;
+            if (mods.is_unsigned) {
+                // For unsigned, ensure value is non-negative
+                symbol_table[i].value = (unsigned int)value;
+            } else if (mods.is_signed) {
+                // For signed, store as is
+                symbol_table[i].value = value;
+            } else {
+                // Default behavior (signed)
+                symbol_table[i].value = value;
+            }
+            symbol_table[i].modifiers = mods;
             return true;
         }
     }
+    
     if (var_count < MAX_VARS) {
         symbol_table[var_count].name = strdup(name);
-        symbol_table[var_count].value = value;
+        if (mods.is_unsigned) {
+            symbol_table[var_count].value = (unsigned int)value;
+        } else {
+            symbol_table[var_count].value = value;
+        }
+        symbol_table[var_count].modifiers = mods;
         var_count++;
         return true;
     }
@@ -40,9 +57,15 @@ bool set_variable(char *name, int value) {
 }
 
 /* Function to retrieve variable values */
+
 int get_variable(char *name) {
     for (int i = 0; i < var_count; i++) {
         if (strcmp(symbol_table[i].name, name) == 0) {
+            // If volatile, we could add a memory barrier here
+            if (symbol_table[i].modifiers.is_volatile) {
+                // Prevent optimization of reads
+                asm volatile("" ::: "memory");
+            }
             return symbol_table[i].value;
         }
     }
@@ -204,6 +227,10 @@ optional_modifiers:
 
 modifier:
     VOLATILE
+        { /* No action needed */ }
+    | SIGNED
+        { /* No action needed */ }
+    | UNSIGNED
         { /* No action needed */ }
     ;
 
