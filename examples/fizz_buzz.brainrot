@@ -1,5 +1,5 @@
 skibidi main {
-    rizz i;
+    nut rizz i;
     flex (i = 1; i <= 100; i = i + 1) {
         edging ( (i % 15) == 0 ) {
             yapping("FizzBuzz");

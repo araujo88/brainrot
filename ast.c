@@ -7,6 +7,22 @@
 
 static jmp_buf break_env;
 
+static TypeModifiers current_modifiers = {false, false, false};
+
+void reset_modifiers(void)
+{
+    current_modifiers.is_volatile = false;
+    current_modifiers.is_signed = false;
+    current_modifiers.is_unsigned = false;
+}
+
+TypeModifiers get_current_modifiers(void)
+{
+    TypeModifiers mods = current_modifiers;
+    reset_modifiers(); // Reset for next declaration
+    return mods;
+}
+
 void execute_switch_statement(ASTNode *node)
 {
     int switch_value = evaluate_expression(node->data.switch_stmt.expression);
@@ -45,7 +61,7 @@ void execute_switch_statement(ASTNode *node)
 }
 
 /* Include the symbol table functions */
-extern bool set_variable(char *name, int value);
+extern bool set_variable(char *name, int value, TypeModifiers mod);
 extern int get_variable(char *name);
 extern void yyerror(const char *s);
 extern void yapping(const char *format, ...);
@@ -82,6 +98,7 @@ ASTNode *create_assignment_node(char *name, ASTNode *expr)
 {
     ASTNode *node = malloc(sizeof(ASTNode));
     node->type = NODE_ASSIGNMENT;
+    node->modifiers = get_current_modifiers();
     node->data.op.left = create_identifier_node(name);
     node->data.op.right = expr;
     node->data.op.op = '=';
@@ -219,7 +236,7 @@ int evaluate_expression(ASTNode *node)
     case NODE_ASSIGNMENT:
     {
         int value = evaluate_expression(node->data.op.right);
-        set_variable(node->data.op.left->data.name, value);
+        set_variable(node->data.op.left->data.name, value, node->modifiers);
         return value;
     }
     case NODE_OPERATION:
