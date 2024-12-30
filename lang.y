@@ -11,6 +11,8 @@ void yyerror(const char *s);
 void yapping(const char* format, ...);
 void yappin(const char* format, ...);
 void baka(const char* format, ...);
+TypeModifiers get_variable_modifiers(const char* name);
+extern TypeModifiers current_modifiers;
 
 /* Symbol table to hold variable values */
 typedef struct {
@@ -227,11 +229,11 @@ optional_modifiers:
 
 modifier:
     VOLATILE
-        { /* No action needed */ }
+        { current_modifiers.is_volatile = true; }
     | SIGNED
-        { /* No action needed */ }
-    | UNSIGNED
-        { /* No action needed */ }
+        { current_modifiers.is_signed = true; }
+    | UNSIGNED 
+        { current_modifiers.is_unsigned = true; }
     ;
 
 for_statement:
@@ -386,4 +388,14 @@ void baka(const char* format, ...) {
     va_start(args, format);
     vfprintf(stderr, format, args);
     va_end(args);
+}
+
+TypeModifiers get_variable_modifiers(const char* name) {
+    TypeModifiers mods = {false, false, false};  // Default modifiers
+    for (int i = 0; i < var_count; i++) {
+        if (strcmp(symbol_table[i].name, name) == 0) {
+            return symbol_table[i].modifiers;
+        }
+    }
+    return mods;  // Return default modifiers if not found
 }

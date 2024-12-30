@@ -1,0 +1,5 @@
+skibidi main {
+	nonut rizz num1 = 3459145475;
+	nonut rizz num2 = num1 % 3;
+	yapping("%u", num2);
+}

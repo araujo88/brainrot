@@ -7,7 +7,7 @@
 
 static jmp_buf break_env;
 
-static TypeModifiers current_modifiers = {false, false, false};
+TypeModifiers current_modifiers = {false, false, false};
 
 void reset_modifiers(void)
 {
@@ -67,6 +67,7 @@ extern void yyerror(const char *s);
 extern void yapping(const char *format, ...);
 extern void yappin(const char *format, ...);
 extern void baka(const char *format, ...);
+extern TypeModifiers get_variable_modifiers(const char *name);
 
 /* Function implementations */
 
@@ -112,6 +113,11 @@ ASTNode *create_operation_node(OperatorType op, ASTNode *left, ASTNode *right)
     node->data.op.left = left;
     node->data.op.right = right;
     node->data.op.op = op;
+
+    node->modifiers.is_unsigned = left->modifiers.is_unsigned || right->modifiers.is_unsigned;
+    node->modifiers.is_signed = false;
+    node->modifiers.is_volatile = left->modifiers.is_volatile || right->modifiers.is_volatile;
+
     return node;
 }
 
@@ -232,48 +238,112 @@ int evaluate_expression(ASTNode *node)
     case NODE_CHAR:
         return node->data.value;
     case NODE_IDENTIFIER:
-        return get_variable(node->data.name);
+    {
+        char *name = node->data.name;
+        TypeModifiers mods = get_variable_modifiers(name);
+        int value = get_variable(name);
+        if (mods.is_unsigned)
+        {
+            return (int)(unsigned int)value;
+        }
+        return value;
+    }
     case NODE_ASSIGNMENT:
     {
         int value = evaluate_expression(node->data.op.right);
         set_variable(node->data.op.left->data.name, value, node->modifiers);
+        if (node->modifiers.is_unsigned)
+        {
+            return (int)(unsigned int)value;
+        }
         return value;
     }
     case NODE_OPERATION:
     {
+        // Check if either operand is from an unsigned variable
+        bool is_unsigned = false;
+        if (node->data.op.left->type == NODE_IDENTIFIER)
+        {
+            TypeModifiers left_mods = get_variable_modifiers(node->data.op.left->data.name);
+            is_unsigned = left_mods.is_unsigned;
+        }
+        if (!is_unsigned && node->data.op.right->type == NODE_IDENTIFIER)
+        {
+            TypeModifiers right_mods = get_variable_modifiers(node->data.op.right->data.name);
+            is_unsigned = right_mods.is_unsigned;
+        }
+
         int left = evaluate_expression(node->data.op.left);
         int right = evaluate_expression(node->data.op.right);
-        switch (node->data.op.op)
+
+        if (is_unsigned)
         {
-        case OP_PLUS:
-            return left + right;
-        case OP_MINUS:
-            return left - right;
-        case OP_TIMES:
-            return left * right;
-        case OP_DIVIDE:
-            return left / right;
-        case OP_MOD:
-            return left % right;
-        case OP_LT:
-            return left < right;
-        case OP_GT:
-            return left > right;
-        case OP_LE:
-            return left <= right;
-        case OP_GE:
-            return left >= right;
-        case OP_EQ:
-            return left == right;
-        case OP_NE:
-            return left != right;
-        case OP_AND:
-            return left && right;
-        case OP_OR:
-            return left || right;
-        default:
-            yyerror("Unknown operator");
-            return 0;
+            unsigned int uleft = (unsigned int)left;
+            unsigned int uright = (unsigned int)right;
+
+            switch (node->data.op.op)
+            {
+            case OP_MOD:
+                return (int)(uleft % uright);
+            case OP_PLUS:
+                return (int)(uleft + uright);
+            case OP_MINUS:
+                return (int)(uleft - uright);
+            case OP_TIMES:
+                return (int)(uleft * uright);
+            case OP_DIVIDE:
+                return (int)(uleft / uright);
+            case OP_LT:
+                return uleft < uright;
+            case OP_GT:
+                return uleft > uright;
+            case OP_LE:
+                return uleft <= uright;
+            case OP_GE:
+                return uleft >= uright;
+            case OP_EQ:
+                return uleft == uright;
+            case OP_NE:
+                return uleft != uright;
+            default:
+                yyerror("Unknown operator");
+                return 0;
+            }
+        }
+        else
+        {
+            switch (node->data.op.op)
+            {
+            case OP_MOD:
+                return left % right;
+            case OP_PLUS:
+                return left + right;
+            case OP_MINUS:
+                return left - right;
+            case OP_TIMES:
+                return left * right;
+            case OP_DIVIDE:
+                return left / right;
+            case OP_LT:
+                return left < right;
+            case OP_GT:
+                return left > right;
+            case OP_LE:
+                return left <= right;
+            case OP_GE:
+                return left >= right;
+            case OP_EQ:
+                return left == right;
+            case OP_NE:
+                return left != right;
+            case OP_AND:
+                return left && right;
+            case OP_OR:
+                return left || right;
+            default:
+                yyerror("Unknown operator");
+                return 0;
+            }
         }
     }
     case NODE_UNARY_OPERATION:
