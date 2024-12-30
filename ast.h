@@ -173,4 +173,6 @@ void execute_baka_call(ArgumentList *args);
 void free_ast(ASTNode *node);
 void reset_modifiers(void);
 
+extern TypeModifiers current_modifiers;
+
 #endif /* AST_H */
