@@ -176,6 +176,8 @@ Brainrot replaces familiar C keywords with meme-inspired slang:
 | chungus    | union        |
 | nonut      | unsigned     |
 | schizo     | volatile     |
+| yes        | true         |
+| no         | false        |
 
 ### 7.2. Operators
 
