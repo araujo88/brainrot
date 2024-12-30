@@ -503,6 +503,7 @@ void execute_yapping_call(ArgumentList *args)
 {
     if (!args)
     {
+        yyerror("No argument ");
         yapping("\n");
         return;
     }
@@ -536,6 +537,7 @@ void execute_yapping_call(ArgumentList *args)
     else
     {
         // No additional values, so just print the string
+        //yyerror("No argument ");
         yapping("%s", formatString);
     }
 }
@@ -544,6 +546,7 @@ void execute_yappin_call(ArgumentList *args)
 {
     if (!args)
     {
+        yyerror("No argument ");
         yappin("\n");
         return;
     }
