@@ -209,4 +209,8 @@ This project is licensed under the GPL License - see the LICENSE file for detail
 3. Limited string manipulation capabilities
 4. No support for complex control structures
 
+## 🗪 Community
+
+Join our community on [Discord](https://discord.com/invite/G9BqwB3a).
+
 Please report any additional issues in the GitHub Issues section.
