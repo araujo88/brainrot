@@ -1,13 +1,12 @@
 skibidi main {
-    cap is_valid = yes;
-    cap is_ready = no;
+    cap nocap = yes;
 
-    edging(is_valid) {
+    edging(nocap) {
         yapping("It's valid!");
     }
     
-    is_valid = yes && no;
-    yapping("%d", is_valid);
-    is_valid = yes || no;
-    yapping("%d", is_valid);
+    nocap = yes && no;
+    yapping("%d", nocap);
+    nocap = yes || no;
+    yapping("%d", nocap);
 }
