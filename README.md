@@ -147,6 +147,8 @@ skibidi main {
 | chungus    | union        | ❌           |
 | nonut      | unsigned     | ✅           |
 | schizo     | volatile     | ✅           |
+| yes        | true         | ✅           |
+| no         | false        | ✅           |
 
 ### Builtin functions
 
