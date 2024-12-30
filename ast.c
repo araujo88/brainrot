@@ -87,6 +87,15 @@ ASTNode *create_char_node(char value)
     return node;
 }
 
+ASTNode *create_boolean_node(int value)
+{
+    ASTNode *node = malloc(sizeof(ASTNode));
+    node->type = NODE_BOOLEAN;
+    node->data.value = value ? 1 : 0;
+    node->modifiers.is_boolean = true;
+    return node;
+}
+
 ASTNode *create_identifier_node(char *name)
 {
     ASTNode *node = malloc(sizeof(ASTNode));
@@ -100,6 +109,10 @@ ASTNode *create_assignment_node(char *name, ASTNode *expr)
     ASTNode *node = malloc(sizeof(ASTNode));
     node->type = NODE_ASSIGNMENT;
     node->modifiers = get_current_modifiers();
+    if (expr->type == NODE_BOOLEAN)
+    {
+        node->modifiers.is_boolean = true;
+    }
     node->data.op.left = create_identifier_node(name);
     node->data.op.right = expr;
     node->data.op.op = '=';
@@ -236,6 +249,8 @@ int evaluate_expression(ASTNode *node)
     case NODE_NUMBER:
         return node->data.value;
     case NODE_CHAR:
+        return node->data.value;
+    case NODE_BOOLEAN:
         return node->data.value;
     case NODE_IDENTIFIER:
     {
@@ -577,36 +592,50 @@ void execute_yapping_call(ArgumentList *args)
         return;
     }
 
-    // Evaluate the first argument as a string (the format)
-    // e.g. "Hello %d\n"
     ASTNode *formatNode = args->expr;
     if (formatNode->type != NODE_STRING_LITERAL)
     {
         yyerror("First argument to yapping must be a string literal");
         return;
     }
-    const char *formatString = formatNode->data.name;
 
-    // Move to next argument(s), which are the actual values
     ArgumentList *cur = args->next;
-
-    // If you only want to handle exactly one additional integer:
     if (cur)
     {
-        // Evaluate expression (e.g. 42)
-        int val = evaluate_expression(cur->expr);
+        ASTNode *expr = cur->expr;
+        int val;
+        bool is_bool = false;
 
-        // Pass that to yapping(...) as if you did yapping("Hello %d\n", 42);
-        yapping(formatString, val);
+        // Check if we're dealing with a boolean
+        if (expr->type == NODE_BOOLEAN)
+        {
+            is_bool = true;
+            val = expr->data.value;
+        }
+        else if (expr->type == NODE_IDENTIFIER)
+        {
+            TypeModifiers mods = get_variable_modifiers(expr->data.name);
+            is_bool = mods.is_boolean;
+            val = evaluate_expression(expr);
+        }
+        else
+        {
+            val = evaluate_expression(expr);
+        }
 
-        // You could handle more arguments if needed:
-        // cur = cur->next;
-        // ...
+        // If it's a boolean, ignore the format string and print yes/no
+        if (is_bool)
+        {
+            yapping(val ? "yes" : "no");
+        }
+        else
+        {
+            yapping(formatNode->data.name, val);
+        }
     }
     else
     {
-        // No additional values, so just print the string
-        yapping("%s", formatString);
+        yapping("%s", formatNode->data.name);
     }
 }
 

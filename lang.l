@@ -76,6 +76,7 @@ extern int yylineno;
 "schizo"         { return VOLATILE; }
 "goon"           { return GOON; }
 "baka"           { return BAKA; }
+"cap"            { return CAP; }
 
 "=="             { return EQ; }
 "!="             { return NE; }
@@ -101,6 +102,8 @@ extern int yylineno;
 ","              { return COMMA; }
 ":"              { return COLON; }
 
+"yes"            { yylval.ival = 1; return BOOLEAN; }
+"no"             { yylval.ival = 0; return BOOLEAN; }
 [0-9]+           { yylval.ival = atoi(yytext); return NUMBER; }
 '.' { yylval.ival = yytext[1]; return CHAR; }
 [a-zA-Z_][a-zA-Z0-9_]* { yylval.sval = strdup(yytext); return IDENTIFIER; }

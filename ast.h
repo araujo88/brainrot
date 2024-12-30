@@ -35,6 +35,7 @@ typedef enum
 {
     NODE_NUMBER,
     NODE_CHAR,
+    NODE_BOOLEAN,
     NODE_IDENTIFIER,
     NODE_ASSIGNMENT,
     NODE_OPERATION,
@@ -91,6 +92,7 @@ typedef struct
     bool is_volatile;
     bool is_signed;
     bool is_unsigned;
+    bool is_boolean;
 } TypeModifiers;
 
 /* AST node structure */
@@ -142,6 +144,7 @@ struct ASTNode
 /* Function prototypes */
 ASTNode *create_number_node(int value);
 ASTNode *create_char_node(char value);
+ASTNode *create_boolean_node(int value);
 ASTNode *create_identifier_node(char *name);
 ASTNode *create_assignment_node(char *name, ASTNode *expr);
 ASTNode *create_operation_node(OperatorType op, ASTNode *left, ASTNode *right);

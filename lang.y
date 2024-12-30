@@ -91,7 +91,7 @@ ASTNode *root = NULL;
 }
 
 /* Define token types */
-%token SKIBIDI RIZZ YAP BAKA MAIN BUSSIN FLEX 
+%token SKIBIDI RIZZ YAP BAKA MAIN BUSSIN FLEX CAP
 %token PLUS MINUS TIMES DIVIDE MOD SEMICOLON COLON COMMA
 %token LPAREN RPAREN LBRACE RBRACE
 %token LT GT LE GE EQ NE EQUALS AND OR
@@ -102,6 +102,7 @@ ASTNode *root = NULL;
 %token <ival> NUMBER
 %token <sval> STRING_LITERAL
 %token <cval> CHAR
+%token <ival> BOOLEAN
 
 /* Declare types for non-terminals */
 %type <node> program skibidi_function
@@ -218,6 +219,16 @@ declaration:
         { $$ = create_assignment_node($3, create_char_node(0)); }
     | optional_modifiers YAP IDENTIFIER EQUALS expression
         { $$ = create_assignment_node($3, $5); }
+    | optional_modifiers CAP IDENTIFIER
+        { 
+            current_modifiers.is_boolean = true; 
+            $$ = create_assignment_node($3, create_boolean_node(0)); 
+        }
+    | optional_modifiers CAP IDENTIFIER EQUALS expression
+        { 
+            current_modifiers.is_boolean = true; 
+            $$ = create_assignment_node($3, $5); 
+        }
     ;
 
 optional_modifiers:
@@ -234,6 +245,8 @@ modifier:
         { current_modifiers.is_signed = true; }
     | UNSIGNED 
         { current_modifiers.is_unsigned = true; }
+    | CAP
+        { current_modifiers.is_boolean = true; } 
     ;
 
 for_statement:
@@ -317,6 +330,8 @@ expression:
         { $$ = create_number_node($1); }
     | CHAR
         { $$ = create_char_node($1); }
+    | BOOLEAN
+        { $$ = create_boolean_node($1); }
     | IDENTIFIER
         { $$ = create_identifier_node($1); }
     | IDENTIFIER EQUALS expression
