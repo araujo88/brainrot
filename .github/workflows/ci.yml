@@ -33,6 +33,9 @@ jobs:
           flex lang.l
           gcc -o brainrot lang.tab.c lex.yy.c ast.c -lfl
 
+      - name: Make Brainrot executable
+        run: chmod +x brainrot
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
