@@ -90,4 +90,5 @@ jobs:
       - name: Run Pytest
         run: |
           source .venv/bin/activate
-          pytest -v tests/
+          cd tests
+          pytest -v test_brainrot.py
