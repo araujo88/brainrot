@@ -577,8 +577,29 @@ void execute_statement(ASTNode *node)
     switch (node->type)
     {
     case NODE_ASSIGNMENT:
-        execute_assignment(node);
+    {
+        char *name = node->data.op.left->data.name;
+        ASTNode *value_node = node->data.op.right;
+        TypeModifiers mods = node->modifiers;
+
+        if (is_float_expression(value_node))
+        {
+            float value = evaluate_expression_float(value_node);
+            if (!set_float_variable(name, value, mods))
+            {
+                yyerror("Failed to set float variable");
+            }
+        }
+        else
+        {
+            int value = evaluate_expression_int(value_node);
+            if (!set_int_variable(name, value, mods))
+            {
+                yyerror("Failed to set integer variable");
+            }
+        }
         break;
+    }
     case NODE_OPERATION:
     case NODE_UNARY_OPERATION:
     case NODE_NUMBER:
@@ -679,11 +700,35 @@ void execute_statements(ASTNode *node)
 
 void execute_for_statement(ASTNode *node)
 {
-    evaluate_expression(node->data.for_stmt.init);
-    while (evaluate_expression(node->data.for_stmt.cond))
+    // Execute initialization once
+    if (node->data.for_stmt.init)
     {
-        execute_statement(node->data.for_stmt.body);
-        evaluate_expression(node->data.for_stmt.incr);
+        execute_statement(node->data.for_stmt.init);
+    }
+
+    while (1)
+    {
+        // Evaluate condition
+        if (node->data.for_stmt.cond)
+        {
+            int cond_result = evaluate_expression(node->data.for_stmt.cond);
+            if (!cond_result)
+            {
+                break;
+            }
+        }
+
+        // Execute body
+        if (node->data.for_stmt.body)
+        {
+            execute_statement(node->data.for_stmt.body);
+        }
+
+        // Execute increment
+        if (node->data.for_stmt.incr)
+        {
+            execute_statement(node->data.for_stmt.incr);
+        }
     }
 }
 
