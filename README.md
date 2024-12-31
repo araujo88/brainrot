@@ -144,7 +144,7 @@ Join our community on [Discord](https://discord.com/invite/G9BqwB3a).
 | edgy       | register     | ❌           |
 | soy        | short        | ✅           |
 | nut        | signed       | ✅           |
-| maxxing    | sizeof       | ❌           |
+| maxxing    | sizeof       | ✅           |
 | salty      | static       | ❌           |
 | gang       | struct       | ❌           |
 | ohio       | switch       | ✅           |

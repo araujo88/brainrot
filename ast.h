@@ -52,6 +52,7 @@ typedef enum
     NODE_DEFAULT_CASE,
     NODE_BREAK_STATEMENT,
     NODE_FUNC_CALL,
+    NODE_SIZEOF,
 } NodeType;
 
 /* Structures */
@@ -93,6 +94,7 @@ typedef struct
     bool is_signed;
     bool is_unsigned;
     bool is_boolean;
+    bool is_sizeof;
 } TypeModifiers;
 
 /* AST node structure */
@@ -154,6 +156,7 @@ ASTNode *create_while_statement_node(ASTNode *cond, ASTNode *body);
 ASTNode *create_function_call_node(char *func_name, ArgumentList *args);
 ArgumentList *create_argument_list(ASTNode *expr, ArgumentList *existing_list);
 ASTNode *create_print_statement_node(ASTNode *expr);
+ASTNode *create_sizeof_node(char *identifier);
 ASTNode *create_error_statement_node(ASTNode *expr);
 ASTNode *create_statement_list(ASTNode *statement, ASTNode *next_statement);
 ASTNode *create_if_statement_node(ASTNode *condition, ASTNode *then_branch, ASTNode *else_branch);

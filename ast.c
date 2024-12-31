@@ -96,6 +96,14 @@ ASTNode *create_boolean_node(int value)
     return node;
 }
 
+ASTNode *create_sizeof_node(char *identifier)
+{
+    ASTNode *node = malloc(sizeof(ASTNode));
+    node->type = NODE_SIZEOF;
+    node->data.name = strdup(identifier);
+    return node;
+}
+
 ASTNode *create_identifier_node(char *name)
 {
     ASTNode *node = malloc(sizeof(ASTNode));
@@ -252,6 +260,34 @@ int evaluate_expression(ASTNode *node)
         return node->data.value;
     case NODE_BOOLEAN:
         return node->data.value;
+    case NODE_SIZEOF:
+    {
+        // Get the variable's modifiers to determine its type
+        TypeModifiers mods = get_variable_modifiers(node->data.name);
+
+        // Calculate size based on type and return as size_t (unsigned long)
+        size_t size;
+
+        if (mods.is_boolean)
+        {
+            size = sizeof(bool);
+        }
+        else if (mods.is_unsigned)
+        {
+            size = sizeof(unsigned int);
+        }
+        else if (mods.is_signed)
+        {
+            size = sizeof(int);
+        }
+        else
+        {
+            // Default case for regular integers
+            size = sizeof(int);
+        }
+
+        return (int)size; // Cast to int since that's what evaluate_expression returns
+    }
     case NODE_IDENTIFIER:
     {
         char *name = node->data.name;
@@ -603,27 +639,30 @@ void execute_yapping_call(ArgumentList *args)
     if (cur)
     {
         ASTNode *expr = cur->expr;
-        int val;
+        int val = evaluate_expression(expr);
+
+        // Special handling for sizeof operations and variables containing sizeof results
+        if (expr->type == NODE_SIZEOF ||
+            (expr->type == NODE_IDENTIFIER &&
+             strstr(formatNode->data.name, "%lu") != NULL))
+        {
+            yapping(formatNode->data.name, (unsigned long)val);
+            return;
+        }
+
+        // Normal value handling
         bool is_bool = false;
 
-        // Check if we're dealing with a boolean
         if (expr->type == NODE_BOOLEAN)
         {
             is_bool = true;
-            val = expr->data.value;
         }
         else if (expr->type == NODE_IDENTIFIER)
         {
             TypeModifiers mods = get_variable_modifiers(expr->data.name);
             is_bool = mods.is_boolean;
-            val = evaluate_expression(expr);
-        }
-        else
-        {
-            val = evaluate_expression(expr);
         }
 
-        // If it's a boolean, ignore the format string and print yes/no
         if (is_bool)
         {
             yapping(val ? "yes" : "no");

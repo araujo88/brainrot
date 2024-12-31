@@ -334,6 +334,8 @@ expression:
         { $$ = create_boolean_node($1); }
     | IDENTIFIER
         { $$ = create_identifier_node($1); }
+    | SIZEOF LPAREN IDENTIFIER RPAREN
+        { $$ = create_sizeof_node($3); }
     | IDENTIFIER EQUALS expression
         { $$ = create_assignment_node($1, $3); }
     | expression PLUS expression
