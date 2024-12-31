@@ -1,0 +1,13 @@
+skibidi main {
+    rizz x = 42;
+    nonut rizz y = 100;
+    cap z = yes;
+    
+    rizz size1 = maxxing(x);
+    rizz size2 = maxxing(y);
+    rizz size3 = maxxing(z); 
+    
+    yapping("%lu", size1);
+    yapping("%lu", size2);
+    yapping("%lu", size3);
+}
