@@ -1,6 +1,6 @@
 skibidi main {
     rizz i;
-    flex (i = 0; i < 10; i = i + 1) {
+    flex (i = 0; i < 6; i = i + 1) {
         yapping("Skibidi toilet");
     }
     bussin 0;
