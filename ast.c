@@ -7,7 +7,7 @@
 
 static jmp_buf break_env;
 
-TypeModifiers current_modifiers = {false, false, false};
+TypeModifiers current_modifiers = {false, false, false, false, false};
 
 variable symbol_table[MAX_VARS];
 int var_count = 0;
@@ -130,6 +130,7 @@ ASTNode *create_number_node(int value)
     ASTNode *node = malloc(sizeof(ASTNode));
     node->type = NODE_NUMBER;
     node->data.value = value;
+    node->modifiers.is_unsigned = current_modifiers.is_unsigned;
     return node;
 }
 
@@ -231,9 +232,39 @@ int evaluate_expression_int(ASTNode *node)
         return node->data.value;
     case NODE_BOOLEAN:
         return node->data.value; // Already 1 or 0
+    case NODE_CHAR:              // Add explicit handling for characters
+        return node->data.value;
     case NODE_FLOAT:
         yyerror("Cannot use float in integer context");
         return (int)node->data.fvalue;
+    case NODE_SIZEOF:
+    {
+        char *name = node->data.name;
+        for (int i = 0; i < var_count; i++)
+        {
+            if (strcmp(symbol_table[i].name, name) == 0)
+            {
+                if (symbol_table[i].is_float)
+                {
+                    return sizeof(float);
+                }
+                else if (symbol_table[i].modifiers.is_unsigned)
+                {
+                    return sizeof(unsigned int);
+                }
+                else if (symbol_table[i].modifiers.is_boolean)
+                {
+                    return sizeof(bool);
+                }
+                else
+                {
+                    return sizeof(int);
+                }
+            }
+        }
+        yyerror("Undefined variable in sizeof");
+        return 0;
+    }
     case NODE_IDENTIFIER:
     {
         char *name = node->data.name;
@@ -291,6 +322,18 @@ int evaluate_expression_int(ASTNode *node)
             }
             return left / right;
         case OP_MOD:
+            if (right == 0)
+            {
+                yyerror("Division by zero");
+                return 0;
+            }
+            // Explicitly handle unsigned modulo
+            if (node->modifiers.is_unsigned)
+            {
+                unsigned int ul = (unsigned int)left;
+                unsigned int ur = (unsigned int)right;
+                return ul % ur;
+            }
             return left % right;
         case OP_LT:
             return left < right;
@@ -582,7 +625,15 @@ void execute_statement(ASTNode *node)
         ASTNode *value_node = node->data.op.right;
         TypeModifiers mods = node->modifiers;
 
-        if (is_float_expression(value_node))
+        if (value_node->type == NODE_CHAR)
+        {
+            // Handle character assignments directly
+            if (!set_int_variable(name, value_node->data.value, mods))
+            {
+                yyerror("Failed to set character variable");
+            }
+        }
+        else if (is_float_expression(value_node))
         {
             float value = evaluate_expression_float(value_node);
             if (!set_float_variable(name, value, mods))
@@ -824,16 +875,7 @@ void execute_yapping_call(ArgumentList *args)
 
     ASTNode *expr = cur->expr;
 
-    // Special handling for sizeof
-    if (expr->type == NODE_SIZEOF ||
-        (expr->type == NODE_IDENTIFIER && strstr(formatNode->data.name, "%lu") != NULL))
-    {
-        int val = evaluate_expression_int(expr);
-        yapping(formatNode->data.name, (unsigned long)val);
-        return;
-    }
-
-    // Handle float expressions first
+    // Handle float expressions
     if (is_float_expression(expr))
     {
         float val = evaluate_expression_float(expr);
@@ -841,26 +883,60 @@ void execute_yapping_call(ArgumentList *args)
         return;
     }
 
-    // Handle boolean values
+    // Check if we're dealing with an unsigned value
+    bool is_unsigned = false;
     bool is_bool = false;
+
     if (expr->type == NODE_BOOLEAN)
     {
         is_bool = true;
     }
-    else if (expr->type == NODE_IDENTIFIER)
+    if (expr->type == NODE_IDENTIFIER)
     {
         TypeModifiers mods = get_variable_modifiers(expr->data.name);
+        is_unsigned = mods.is_unsigned;
         is_bool = mods.is_boolean;
+    }
+    else
+    {
+        // Check if the node itself has unsigned modifier
+        is_unsigned = expr->modifiers.is_unsigned;
     }
 
     if (is_bool)
     {
         int val = evaluate_expression_int(expr);
-        yapping(val ? "yes" : "no");
+
+        // If format specifier is present, handle differently
+        if (strstr(formatNode->data.name, "%") != NULL)
+        {
+            yapping(formatNode->data.name, val);
+        }
+        else
+        {
+            yapping("%s", val ? "yes" : "no");
+        }
+        return;
+    }
+    if (is_unsigned)
+    {
+        unsigned int val = (unsigned int)evaluate_expression_int(expr);
+        if (strstr(formatNode->data.name, "%lu") != NULL)
+        {
+            yapping(formatNode->data.name, (unsigned long)val);
+        }
+        else if (strstr(formatNode->data.name, "%u") != NULL)
+        {
+            yapping(formatNode->data.name, val);
+        }
+        else
+        {
+            yapping("%u", val);
+        }
         return;
     }
 
-    // Handle integers
+    // Handle regular integers
     int val = evaluate_expression_int(expr);
     yapping(formatNode->data.name, val);
 }
