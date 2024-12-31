@@ -69,7 +69,7 @@ sudo ln -s /path/to/libfl.dylib /usr/local/lib/libfl.dylib  # For Intel Macs
 1. Clone this repository:
 
 ```bash
-git clone https://github.com/araujo88/brainrot.git
+git clone https://github.com/Brainrotlang/brainrot.git
 cd brainrot
 ```
 
