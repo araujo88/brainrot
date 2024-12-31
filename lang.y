@@ -14,30 +14,16 @@ void baka(const char* format, ...);
 TypeModifiers get_variable_modifiers(const char* name);
 extern TypeModifiers current_modifiers;
 
-/* Symbol table to hold variable values */
-typedef struct {
-    char *name;
-    int value;
-    TypeModifiers modifiers;
-} variable;
-
-#define MAX_VARS 100
-variable symbol_table[MAX_VARS];
-int var_count = 0;
-
 /* Function to add or update variables in the symbol table */
 bool set_variable(char *name, int value, TypeModifiers mods) {
     for (int i = 0; i < var_count; i++) {
         if (strcmp(symbol_table[i].name, name) == 0) {
             if (mods.is_unsigned) {
-                // For unsigned, ensure value is non-negative
-                symbol_table[i].value = (unsigned int)value;
+                symbol_table[i].value.ivalue = (unsigned int)value;
             } else if (mods.is_signed) {
-                // For signed, store as is
-                symbol_table[i].value = value;
+                symbol_table[i].value.ivalue = value;
             } else {
-                // Default behavior (signed)
-                symbol_table[i].value = value;
+                symbol_table[i].value.ivalue = value;
             }
             symbol_table[i].modifiers = mods;
             return true;
@@ -47,9 +33,9 @@ bool set_variable(char *name, int value, TypeModifiers mods) {
     if (var_count < MAX_VARS) {
         symbol_table[var_count].name = strdup(name);
         if (mods.is_unsigned) {
-            symbol_table[var_count].value = (unsigned int)value;
+            symbol_table[var_count].value.ivalue = (unsigned int)value;
         } else {
-            symbol_table[var_count].value = value;
+            symbol_table[var_count].value.ivalue = value;
         }
         symbol_table[var_count].modifiers = mods;
         var_count++;
@@ -58,17 +44,14 @@ bool set_variable(char *name, int value, TypeModifiers mods) {
     return false;
 }
 
-/* Function to retrieve variable values */
-
+/* Fix get_variable function: */
 int get_variable(char *name) {
     for (int i = 0; i < var_count; i++) {
         if (strcmp(symbol_table[i].name, name) == 0) {
-            // If volatile, we could add a memory barrier here
             if (symbol_table[i].modifiers.is_volatile) {
-                // Prevent optimization of reads
                 asm volatile("" ::: "memory");
             }
-            return symbol_table[i].value;
+            return symbol_table[i].value.ivalue;
         }
     }
     yyerror("Undefined variable");
@@ -83,6 +66,7 @@ ASTNode *root = NULL;
 
 %union {
     int ival;
+    float fval;
     char cval;
     char *sval;
     ASTNode *node;
@@ -96,13 +80,14 @@ ASTNode *root = NULL;
 %token LPAREN RPAREN LBRACE RBRACE
 %token LT GT LE GE EQ NE EQUALS AND OR
 %token BREAK CASE CONST CONTINUE DEFAULT DO DOUBLE ELSE ENUM
-%token EXTERN FLOAT FOR GOTO IF INT LONG REGISTER SHORT SIGNED
+%token EXTERN CHAD FOR GOTO IF INT LONG REGISTER SHORT SIGNED
 %token SIZEOF STATIC STRUCT SWITCH TYPEDEF UNION UNSIGNED VOID VOLATILE GOON
 %token <sval> IDENTIFIER
 %token <ival> NUMBER
 %token <sval> STRING_LITERAL
 %token <cval> CHAR
 %token <ival> BOOLEAN
+%token <fval> FLOAT_LITERAL
 
 /* Declare types for non-terminals */
 %type <node> program skibidi_function
@@ -214,6 +199,10 @@ declaration:
     optional_modifiers RIZZ IDENTIFIER
         { $$ = create_assignment_node($3, create_number_node(0)); }
     | optional_modifiers RIZZ IDENTIFIER EQUALS expression
+        { $$ = create_assignment_node($3, $5); }
+    | optional_modifiers CHAD IDENTIFIER
+        { $$ = create_assignment_node($3, create_float_node(0.0f)); }
+    | optional_modifiers CHAD IDENTIFIER EQUALS expression
         { $$ = create_assignment_node($3, $5); }
     |  optional_modifiers YAP IDENTIFIER
         { $$ = create_assignment_node($3, create_char_node(0)); }
@@ -328,6 +317,8 @@ return_statement:
 expression:
       NUMBER
         { $$ = create_number_node($1); }
+    | FLOAT_LITERAL
+        { $$ = create_float_node($1); } 
     | CHAR
         { $$ = create_char_node($1); }
     | BOOLEAN

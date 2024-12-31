@@ -59,7 +59,7 @@ extern int yylineno;
 "gigachad"       { return DOUBLE; }
 "gyatt"          { return ENUM; }
 "whopper"        { return EXTERN; }
-"chad"           { return FLOAT; }
+"chad"           { return CHAD; }
 "cringe"         { return GOTO; }
 "edging"         { return IF; }
 "amogus"         { return ELSE; }
@@ -102,8 +102,10 @@ extern int yylineno;
 ","              { return COMMA; }
 ":"              { return COLON; }
 
+"//"[^\n]*      ; /* Ignore single line comments */
 "yes"            { yylval.ival = 1; return BOOLEAN; }
 "no"             { yylval.ival = 0; return BOOLEAN; }
+[0-9]+\.[0-9]+  { yylval.fval = atof(yytext); return FLOAT_LITERAL; }
 [0-9]+           { yylval.ival = atoi(yytext); return NUMBER; }
 '.' { yylval.ival = yytext[1]; return CHAR; }
 [a-zA-Z_][a-zA-Z0-9_]* { yylval.sval = strdup(yytext); return IDENTIFIER; }
