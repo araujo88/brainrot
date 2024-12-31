@@ -6,7 +6,7 @@ skibidi main {
     }
     
     nocap = yes && no;
-    yapping("%d", nocap);
+    yapping("nocap: ", nocap);
     nocap = yes || no;
-    yapping("%d", nocap);
+    yapping("nocap: ", nocap);
 }

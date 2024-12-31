@@ -130,7 +130,7 @@ Join our community on [Discord](https://discord.com/invite/G9BqwB3a).
 | goon       | while        | ✅           |
 | bruh       | break        | ✅           |
 | grind      | continue     | ✅           |
-| chad       | float        | ❌           |
+| chad       | float        | ✅           |
 | gigachad   | double       | ❌           |
 | yap        | char         | ✅           |
 | grimace    | const        | ❌           |

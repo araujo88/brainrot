@@ -1,0 +1,8 @@
+skibidi main {
+    // Calculate pi * r^2
+    chad pi = 3.141592;
+    chad r = 5.0;
+    chad area = pi * r * r;    // Area of a circle
+    yappin("%f\n", area);
+    bussin 0;
+}

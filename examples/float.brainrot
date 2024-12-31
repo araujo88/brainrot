@@ -1,0 +1,5 @@
+skibidi main {
+    chad pi = 3.141592;
+    yapping("%f", pi);
+    bussin 0;
+}
