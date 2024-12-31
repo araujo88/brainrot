@@ -142,7 +142,7 @@ Join our community on [Discord](https://discord.com/invite/G9BqwB3a).
 | cringe     | goto         | ❌           |
 | giga       | long         | ❌           |
 | edgy       | register     | ❌           |
-| soy        | short        | ✅           |
+| soy        | short        | ❌           |
 | nut        | signed       | ✅           |
 | maxxing    | sizeof       | ✅           |
 | salty      | static       | ❌           |
