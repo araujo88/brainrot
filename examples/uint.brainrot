@@ -1,0 +1,39 @@
+skibidi main {
+	nonut rizz num1 = 3;
+	nonut rizz num2 = 7;
+	yapping("%u", num1 + num2);
+	nonut rizz num1 = 447863;
+	nonut rizz num2 = 9483874;
+	yapping("%u", num1 + num2);
+
+	nonut rizz num1 = 9;
+	nonut rizz num2 = 6;
+	yapping("%u", num1 - num2);
+	nonut rizz num1 = 647238974;
+	nonut rizz num2 = 9;
+	yapping("%u", num1 - num2);
+
+	nonut rizz num1 = 5;
+	nonut rizz num2 = 4;
+	yapping("%u", num1 * num2);
+	nonut rizz num1 = 55348;
+	nonut rizz num2 = 4434;
+	yapping("%u", num1 * num2);
+
+	nonut rizz num1 = 14;
+	nonut rizz num2 = 7;
+	yapping("%u", num1 / num2);
+	nonut rizz num1 = 12;
+	nonut rizz num2 = 7;
+	yapping("%u", num1 / num2);
+
+	nonut rizz num1 = 8;
+	nonut rizz num2 = 3;
+	yapping("%u", num1 % num2);
+	nonut rizz num1 = 437473348;
+	nonut rizz num2 = 3;
+	yapping("%u", num1 % num2);
+	
+
+	bussin 0;
+}
