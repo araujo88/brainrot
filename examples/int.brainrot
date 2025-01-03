@@ -1,0 +1,39 @@
+skibidi main {
+	rizz num1 = 3;
+	rizz num2 = 7;
+	yapping("%d", num1 + num2);
+	rizz num1 = -4;
+	rizz num2 = 9;
+	yapping("%d", num1 + num2);
+
+	rizz num1 = 9;
+	rizz num2 = 6;
+	yapping("%d", num1 - num2);
+	rizz num1 = 6;
+	rizz num2 = 9;
+	yapping("%d", num1 - num2);
+
+	rizz num1 = 5;
+	rizz num2 = 4;
+	yapping("%d", num1 * num2);
+	rizz num1 = 5;
+	rizz num2 = -4;
+	yapping("%d", num1 * num2);
+
+	rizz num1 = 14;
+	rizz num2 = 7;
+	yapping("%d", num1 / num2);
+	rizz num1 = 12;
+	rizz num2 = 7;
+	yapping("%d", num1 / num2);
+
+	rizz num1 = 8;
+	rizz num2 = 3;
+	yapping("%d", num1 % num2);
+	rizz num1 = -8;
+	rizz num2 = 3;
+	yapping("%d", num1 % num2);
+
+
+	bussin 0;
+}
